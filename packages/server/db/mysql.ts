@@ -5,12 +5,12 @@ import { env } from '../config/env';
 import { AppError } from '../errors/app-error';
 
 const pool = mysql.createPool({
-   host: env.DB_HOST,
-   port: env.DB_PORT,
-   user: env.DB_USER,
-   password: env.DB_PASSWORD,
-   database: env.DB_NAME,
-   connectionLimit: env.DB_CONNECTION_LIMIT,
+   host: env.CHATBOT_DB_HOST,
+   port: env.CHATBOT_DB_PORT,
+   user: env.CHATBOT_DB_USER,
+   password: env.CHATBOT_DB_PASSWORD,
+   database: env.CHATBOT_DB_NAME,
+   connectionLimit: env.CHATBOT_DB_CONNECTION_LIMIT,
    waitForConnections: true,
    queueLimit: 0,
 });

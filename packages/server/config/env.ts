@@ -38,27 +38,27 @@ const envSchema = z.object({
          .default('false')
          .transform((value) => value === 'true')
    ),
-   DB_HOST: z.preprocess(
+   CHATBOT_DB_HOST: z.preprocess(
       emptyStringToUndefined,
-      z.string().trim().min(1, 'DB_HOST is required')
+      z.string().trim().min(1, 'CHATBOT_DB_HOST is required')
    ),
-   DB_PORT: z.preprocess(
+   CHATBOT_DB_PORT: z.preprocess(
       emptyStringToUndefined,
       z.coerce.number().int().min(1).max(65535).default(3306)
    ),
-   DB_NAME: z.preprocess(
+   CHATBOT_DB_NAME: z.preprocess(
       emptyStringToUndefined,
-      z.string().trim().min(1, 'DB_NAME is required')
+      z.string().trim().min(1, 'CHATBOT_DB_NAME is required')
    ),
-   DB_USER: z.preprocess(
+   CHATBOT_DB_USER: z.preprocess(
       emptyStringToUndefined,
-      z.string().trim().min(1, 'DB_USER is required')
+      z.string().trim().min(1, 'CHATBOT_DB_USER is required')
    ),
-   DB_PASSWORD: z.preprocess(
+   CHATBOT_DB_PASSWORD: z.preprocess(
       emptyStringToUndefined,
-      z.string().min(1, 'DB_PASSWORD is required')
+      z.string().min(1, 'CHATBOT_DB_PASSWORD is required')
    ),
-   DB_CONNECTION_LIMIT: z.preprocess(
+   CHATBOT_DB_CONNECTION_LIMIT: z.preprocess(
       emptyStringToUndefined,
       z.coerce.number().int().positive().default(10)
    ),
