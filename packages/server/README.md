@@ -108,7 +108,35 @@ Error responses:
 - `400` for invalid request payloads
 - `500` if the server cannot generate a response
 
+### `GET /api/conversations/:conversationId/messages`
+
+Returns the stored message history for a conversation.
+
+Successful response:
+
+```json
+{
+   "messages": [
+      {
+         "id": 1,
+         "role": "user",
+         "content": "Hello",
+         "openAiResponseId": null,
+         "createdAt": "2026-03-28T21:25:28.000Z"
+      },
+      {
+         "id": 2,
+         "role": "bot",
+         "content": "Hi, how can I help?",
+         "openAiResponseId": "resp_123",
+         "createdAt": "2026-03-28T21:25:29.000Z"
+      }
+   ]
+}
+```
+
 ## Notes
 
 - Conversation state is stored in MySQL in `conversation_sessions`
+- Full message history is stored in MySQL in `conversation_messages`
 - The OpenAI model is currently `gpt-4o-mini`

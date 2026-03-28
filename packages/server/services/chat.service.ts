@@ -4,7 +4,10 @@ import OpenAI from 'openai';
 
 import { env } from '../config/env';
 import { AppError } from '../errors/app-error';
-import { conversationRepository } from '../repositories/conversation.repository';
+import {
+   conversationRepository,
+   type StoredMessage,
+} from '../repositories/conversation.repository';
 import template from '../prompts/chatbot.txt';
 
 const client = new OpenAI({
@@ -54,6 +57,12 @@ export const chatService = {
       conversationId: string
    ): Promise<ChatResponse> {
       try {
+         await conversationRepository.addMessage(
+            conversationId,
+            'user',
+            prompt
+         );
+
          const previousResponseId =
             await conversationRepository.getLastResponseId(conversationId);
 
@@ -71,6 +80,12 @@ export const chatService = {
 
          await conversationRepository.setLastResponseId(
             conversationId,
+            response.id
+         );
+         await conversationRepository.addMessage(
+            conversationId,
+            'bot',
+            response.output_text,
             response.id
          );
 
@@ -96,5 +111,9 @@ export const chatService = {
             statusCode
          );
       }
+   },
+
+   async getMessageHistory(conversationId: string): Promise<StoredMessage[]> {
+      return conversationRepository.getMessages(conversationId);
    },
 };

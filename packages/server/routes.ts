@@ -29,6 +29,11 @@ router.get('/api/hello', (req: Request, res: Response) => {
    res.json({ message: 'Hi Helena!' });
 });
 
+router.get(
+   '/api/conversations/:conversationId/messages',
+   chatController.getMessageHistory
+);
+
 router.post('/api/chat', chatController.sendMessage);
 
 export default router;
