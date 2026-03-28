@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { AlertCircle } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
+import notificationSound from '../assets/sounds/notification.mp3';
+import popSound from '../assets/sounds/pop.mp3';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
 import type { ChatFormData, ChatResponse, Message } from './chat.types';
@@ -33,6 +35,21 @@ const ChatBot = () => {
    const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
    const [messages, setMessages] = useState<Message[]>([]);
    const [errorMessage, setErrorMessage] = useState('');
+   const sendAudioRef = useRef<HTMLAudioElement | null>(null);
+   const receiveAudioRef = useRef<HTMLAudioElement | null>(null);
+
+   const playSound = (
+      audioRef: { current: HTMLAudioElement | null },
+      src: string
+   ) => {
+      const audio = audioRef.current ?? new Audio(src);
+
+      audioRef.current = audio;
+      audio.currentTime = 0;
+      void audio.play().catch(() => {
+         // Ignore playback failures caused by browser autoplay restrictions.
+      });
+   };
 
    const {
       register,
@@ -53,6 +70,7 @@ const ChatBot = () => {
          ...currentMessages,
          { content: trimmedMessage, role: 'user' },
       ]);
+      playSound(sendAudioRef, popSound);
       setIsSubmittingMessage(true);
       setErrorMessage('');
 
@@ -66,6 +84,7 @@ const ChatBot = () => {
             ...currentMessages,
             { content: data.message, role: 'bot' },
          ]);
+         playSound(receiveAudioRef, notificationSound);
          reset();
       } catch (error) {
          Sentry.captureException(error, {
