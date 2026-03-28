@@ -6,6 +6,7 @@ Express API for the chat app. The server exposes a small REST surface and uses t
 
 - Bun
 - An OpenAI API key
+- A MySQL-compatible database
 
 ## Setup
 
@@ -19,10 +20,26 @@ Create a local env file in `packages/server/.env`:
 
 ```env
 OPEN_API_KEY=your_openai_api_key
+CLIENT_ORIGIN=http://localhost:5173
 PORT=3000
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
 ```
 
-The code currently reads `OPEN_API_KEY`, so use that exact variable name.
+The server also supports optional settings:
+
+```env
+JSON_BODY_LIMIT=16kb
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX_REQUESTS=30
+TRUST_PROXY=false
+DB_CONNECTION_LIMIT=10
+```
+
+The code currently reads `OPEN_API_KEY`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, and `DB_PASSWORD`, so use those exact variable names.
 
 ## Run
 
@@ -39,6 +56,12 @@ bun run start
 ```
 
 The server listens on `http://localhost:3000` by default.
+
+## Database
+
+On startup, the server creates the `conversation_sessions` table automatically if it does not already exist.
+
+If you want to create it manually in phpMyAdmin, run the SQL in [conversation_sessions.sql](C:/Users/mbeua/Área%20de%20Trabalho/ai-chatbot-app/packages/server/sql/conversation_sessions.sql).
 
 ## API
 
@@ -87,6 +110,5 @@ Error responses:
 
 ## Notes
 
-- Conversation state is currently stored in memory in `conversation.repository.ts`
-- Restarting the server clears all saved conversation history
+- Conversation state is stored in MySQL in `conversation_sessions`
 - The OpenAI model is currently `gpt-4o-mini`
