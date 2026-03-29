@@ -2,6 +2,7 @@ import OpenAI from 'openai';
 
 import { env } from '../config/env';
 import { AppError } from '../errors/app-error';
+import { logger } from '../lib/logger';
 import { promptService } from './prompt.service';
 
 const client = new OpenAI({
@@ -58,8 +59,10 @@ const createOpenAiServiceError = (error: unknown) => {
 
 export const openAiChatService = {
    async createResponse(prompt: string, previousResponseId?: string) {
+      const startedAt = Date.now();
+
       try {
-         return await withTimeout(
+         const response = await withTimeout(
             client.responses.create({
                model: OPENAI_MODEL,
                instructions: promptService.getInstructions(),
@@ -70,7 +73,25 @@ export const openAiChatService = {
             }),
             OPENAI_TIMEOUT_MS
          );
+
+         logger.info('OpenAI response created', {
+            model: String(response.model),
+            durationMs: Date.now() - startedAt,
+            hasPreviousResponseId: Boolean(previousResponseId),
+            inputLength: prompt.length,
+            inputTokens: response.usage?.input_tokens ?? null,
+            outputTokens: response.usage?.output_tokens ?? null,
+            totalTokens: response.usage?.total_tokens ?? null,
+         });
+
+         return response;
       } catch (error) {
+         logger.error('OpenAI response generation failed', {
+            durationMs: Date.now() - startedAt,
+            hasPreviousResponseId: Boolean(previousResponseId),
+            inputLength: prompt.length,
+            error: error instanceof Error ? error.message : String(error),
+         });
          throw createOpenAiServiceError(error);
       }
    },

@@ -3,9 +3,11 @@ import dotenv from 'dotenv';
 
 import { env } from './config/env';
 import { initializeDatabase } from './db/mysql';
+import { logger } from './lib/logger';
 import { errorHandler, notFoundHandler } from './middleware/error-handler';
 import { createCorsMiddleware } from './middleware/cors';
 import { createRateLimitMiddleware } from './middleware/rate-limit';
+import { requestLogger } from './middleware/request-logger';
 import router from './routes';
 
 dotenv.config();
@@ -22,6 +24,7 @@ app.use(
       allowedOrigins: env.CLIENT_ORIGIN.split(','),
    })
 );
+app.use(requestLogger);
 app.use(express.json({ limit: env.JSON_BODY_LIMIT }));
 app.use(
    createRateLimitMiddleware({
@@ -37,11 +40,17 @@ const startServer = async () => {
    await initializeDatabase();
 
    app.listen(env.PORT, () => {
-      console.log(`Server is running on http://localhost:${env.PORT}`);
+      logger.info('Server started', {
+         port: env.PORT,
+         clientOrigin: env.CLIENT_ORIGIN,
+         trustProxy: env.TRUST_PROXY,
+      });
    });
 };
 
 void startServer().catch((error) => {
-   console.error('Failed to start server:', error);
+   logger.error('Failed to start server', {
+      error: error instanceof Error ? error.message : String(error),
+   });
    process.exit(1);
 });
