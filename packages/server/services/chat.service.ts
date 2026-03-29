@@ -1,8 +1,8 @@
 import {
    conversationRepository,
    type StoredMessage,
-} from '../repositories/conversation.repository';
-import { openAiChatService } from './openai-chat.service';
+} from '../repositories/conversation.repository.js';
+import { openAiChatService } from './openai-chat.service.js';
 
 type ChatResponse = {
    id: string;

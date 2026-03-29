@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { logger } from '../lib/logger';
+import { logger } from '../lib/logger.js';
 
 const getClientIp = (req: Request) =>
    req.ip || req.socket.remoteAddress || 'unknown';

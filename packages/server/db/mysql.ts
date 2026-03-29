@@ -1,5 +1,5 @@
-import { AppError } from '../errors/app-error';
-import { database, pool } from './pool';
+import { AppError } from '../errors/app-error.js';
+import { database, pool } from './pool.js';
 
 const createConnectionError = (error: unknown) =>
    new AppError('Failed to connect to the database.', 500, {

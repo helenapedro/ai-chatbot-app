@@ -1,9 +1,9 @@
 import dotenv from 'dotenv';
 
-import { createApp } from './app';
-import { env } from './config/env';
-import { initializeDatabase } from './db/mysql';
-import { logger } from './lib/logger';
+import { createApp } from './app.js';
+import { env } from './config/env.js';
+import { initializeDatabase } from './db/mysql.js';
+import { logger } from './lib/logger.js';
 
 dotenv.config();
 

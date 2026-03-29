@@ -4,40 +4,41 @@ Express API for the chat app. The server exposes a small REST surface and uses t
 
 ## Requirements
 
-- Bun
+- Node.js 24
 - An OpenAI API key
 - A MySQL-compatible database
 
 ## Setup
 
-Install dependencies from the repo root:
+If you are working inside this monorepo, install dependencies from the repo root:
 
 ```bash
-bun install
+npm install
 ```
 
-Create a local env file in `packages/server/.env`:
+If you want to deploy the server as a standalone Node app, use `packages/server` as the app root and install dependencies there:
+
+```bash
+npm install
+```
+
+Create a local env file from `.env.example`:
 
 ```env
 OPEN_API_KEY=your_openai_api_key
 HELENA_EXPLORA_SITE_URL=https://helenaexplora.hmpedro.com/
-CLIENT_ORIGIN=http://localhost:8080/,https://helenaexplora.hmpedro.com/
+CLIENT_ORIGIN=http://localhost:5173,http://localhost:8080,https://helenaexplora.hmpedro.com
 PORT=3000
+JSON_BODY_LIMIT=16kb
+RATE_LIMIT_WINDOW_MS=60000
+RATE_LIMIT_MAX_REQUESTS=30
+TRUST_PROXY=false
 CHATBOT_ENCRYPTION_KEY=your_64_character_hex_key
 CHATBOT_DB_HOST=127.0.0.1
 CHATBOT_DB_PORT=3306
 CHATBOT_DB_NAME=your_database_name
 CHATBOT_DB_USER=your_database_user
 CHATBOT_DB_PASSWORD=your_database_password
-```
-
-The server also supports optional settings:
-
-```env
-JSON_BODY_LIMIT=16kb
-RATE_LIMIT_WINDOW_MS=60000
-RATE_LIMIT_MAX_REQUESTS=30
-TRUST_PROXY=false
 CHATBOT_DB_CONNECTION_LIMIT=10
 ```
 
@@ -46,7 +47,8 @@ The code currently reads `OPEN_API_KEY`, `HELENA_EXPLORA_SITE_URL`, `CHATBOT_ENC
 Run database migrations before starting the server:
 
 ```bash
-bun run migrate
+npm run build
+npm run migrate
 ```
 
 ## Run
@@ -54,16 +56,46 @@ bun run migrate
 Start in watch mode:
 
 ```bash
-bun run dev
+npm run dev
 ```
 
 Start normally:
 
 ```bash
-bun run start
+npm start
 ```
 
 The server listens on `http://localhost:3000` by default.
+
+## Standalone Deployment
+
+To deploy this package on its own, your deploy root should contain the contents of `packages/server`, not the whole monorepo root.
+
+Required files and directories at deploy time:
+
+- `package.json`
+- `Procfile`
+- `dist/`
+- `prompts/`
+- `.env` or equivalent platform-managed env vars
+
+The prompt loader reads `prompts/chatbot.txt` and `prompts/helenaexplora.md` from the package root at runtime, so keep the `prompts/` directory alongside `dist/`.
+
+Typical standalone flow:
+
+```bash
+npm install
+npm run build
+npm run migrate
+npm start
+```
+
+Heroku-style process types are already defined in `Procfile`:
+
+```Procfile
+release: npm run migrate
+web: npm start
+```
 
 ## Database
 

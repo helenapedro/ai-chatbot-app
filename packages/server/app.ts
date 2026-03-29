@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { env } from './config/env';
-import { errorHandler, notFoundHandler } from './middleware/error-handler';
-import { createCorsMiddleware } from './middleware/cors';
-import { requestLogger } from './middleware/request-logger';
-import { createRateLimitMiddleware } from './middleware/rate-limit';
-import router from './routes';
+import { env } from './config/env.js';
+import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
+import { createCorsMiddleware } from './middleware/cors.js';
+import { requestLogger } from './middleware/request-logger.js';
+import { createRateLimitMiddleware } from './middleware/rate-limit.js';
+import router from './routes.js';
 
 export const createApp = () => {
    const app = express();

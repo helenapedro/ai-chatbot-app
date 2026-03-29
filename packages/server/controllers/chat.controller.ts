@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import z from 'zod';
 
-import { chatService } from '../services/chat.service';
-import { AppError } from '../errors/app-error';
+import { AppError } from '../errors/app-error.js';
+import { chatService } from '../services/chat.service.js';
 
 const chatSchema = z.object({
    prompt: z

@@ -1,8 +1,8 @@
 import type { RowDataPacket } from 'mysql2';
 
-import { logger } from '../lib/logger';
-import { pool } from './pool';
-import { migrations } from './migrations';
+import { logger } from '../lib/logger.js';
+import { migrations } from './migrations/index.js';
+import { pool } from './pool.js';
 
 type SchemaMigrationRow = RowDataPacket & {
    name: string;

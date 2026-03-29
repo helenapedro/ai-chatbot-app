@@ -1,6 +1,6 @@
 import type { RowDataPacket } from 'mysql2';
 
-import { database } from '../../db/mysql';
+import { database } from '../../db/mysql.js';
 
 type ConversationSessionRow = RowDataPacket & {
    last_response_id: string;

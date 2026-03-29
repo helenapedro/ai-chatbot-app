@@ -1,7 +1,7 @@
 import type { RowDataPacket } from 'mysql2';
 
-import { encryptMessageContent } from '../../security/message-crypto';
-import type { Migration } from './migration.types';
+import { encryptMessageContent } from '../../security/message-crypto.js';
+import type { Migration } from './migration.types.js';
 
 type PlaintextConversationMessageRow = RowDataPacket & {
    content: string;

@@ -1,8 +1,8 @@
 import express from 'express';
 import type { Request, Response } from 'express';
 
-import { chatController } from './controllers/chat.controller';
-import { checkDatabaseHealth } from './db/mysql';
+import { chatController } from './controllers/chat.controller.js';
+import { checkDatabaseHealth } from './db/mysql.js';
 
 const router = express.Router();
 

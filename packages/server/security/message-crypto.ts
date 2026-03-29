@@ -1,7 +1,7 @@
 import { createCipheriv, createDecipheriv, randomBytes } from 'crypto';
 
-import { env } from '../config/env';
-import { AppError } from '../errors/app-error';
+import { env } from '../config/env.js';
+import { AppError } from '../errors/app-error.js';
 
 const ENCRYPTION_ALGORITHM = 'aes-256-gcm';
 const IV_LENGTH_BYTES = 12;

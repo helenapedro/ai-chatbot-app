@@ -1,21 +1,26 @@
 {
    "name": "server",
-   "module": "index.ts",
    "type": "module",
    "private": true,
+   "main": "dist/index.js",
+   "files": ["dist", "prompts", "Procfile", "README.md"],
    "scripts": {
-      "migrate": "bun run db/migrate.ts",
-      "start": "bun run index.ts",
-      "dev": "bun --watch run index.ts",
+      "build": "tsc -p tsconfig.build.json",
+      "migrate": "node dist/db/migrate.js",
+      "start": "node dist/index.js",
+      "dev": "tsx watch index.ts",
       "test": "bun test",
       "test:integration": "bun test ./repositories/**/*.integration.test.ts"
    },
    "devDependencies": {
       "@types/bun": "latest",
-      "@types/express": "^5.0.6"
+      "@types/node": "^24.5.2",
+      "@types/express": "^5.0.6",
+      "tsx": "^4.20.6",
+      "typescript": "^5.9.3"
    },
-   "peerDependencies": {
-      "typescript": "^5"
+   "engines": {
+      "node": "24.x"
    },
    "dependencies": {
       "dotenv": "^17.3.1",

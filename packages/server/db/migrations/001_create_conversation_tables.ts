@@ -1,6 +1,6 @@
 import type { Pool } from 'mysql2/promise';
 
-import type { Migration } from './migration.types';
+import type { Migration } from './migration.types.js';
 
 const createConversationSessionsTableSql = `
    CREATE TABLE IF NOT EXISTS conversation_sessions (

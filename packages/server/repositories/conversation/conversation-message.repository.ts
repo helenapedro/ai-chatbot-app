@@ -1,11 +1,11 @@
 import type { RowDataPacket } from 'mysql2';
 
-import { database } from '../../db/mysql';
+import { database } from '../../db/mysql.js';
 import {
    decryptMessageContent,
    encryptMessageContent,
-} from '../../security/message-crypto';
-import type { AddMessageMetadata, StoredMessage } from './conversation.types';
+} from '../../security/message-crypto.js';
+import type { AddMessageMetadata, StoredMessage } from './conversation.types.js';
 
 type ConversationMessageRow = RowDataPacket & {
    content: string;

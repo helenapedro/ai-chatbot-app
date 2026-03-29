@@ -1,9 +1,9 @@
 import OpenAI from 'openai';
 
-import { env } from '../config/env';
-import { AppError } from '../errors/app-error';
-import { logger } from '../lib/logger';
-import { promptService } from './prompt.service';
+import { env } from '../config/env.js';
+import { AppError } from '../errors/app-error.js';
+import { logger } from '../lib/logger.js';
+import { promptService } from './prompt.service.js';
 
 const client = new OpenAI({
    apiKey: env.OPEN_API_KEY,

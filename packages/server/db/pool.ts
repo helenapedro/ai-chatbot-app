@@ -1,7 +1,7 @@
 import type { QueryResult } from 'mysql2';
 import mysql from 'mysql2/promise';
 
-import { env } from '../config/env';
+import { env } from '../config/env.js';
 
 const poolConfig = {
    host: env.CHATBOT_DB_HOST,

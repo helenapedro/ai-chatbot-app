@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { AppError } from '../errors/app-error';
-import { logger } from '../lib/logger';
+import { AppError } from '../errors/app-error.js';
+import { logger } from '../lib/logger.js';
 
 export const notFoundHandler = (req: Request, res: Response) => {
    res.status(404).json({
