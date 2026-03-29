@@ -20,6 +20,7 @@ Create a local env file in `packages/server/.env`:
 
 ```env
 OPEN_API_KEY=your_openai_api_key
+HELENA_EXPLORA_SITE_URL=https://helenaexplora.hmpedro.com/
 CLIENT_ORIGIN=http://localhost:5173
 PORT=3000
 CHATBOT_ENCRYPTION_KEY=your_64_character_hex_key
@@ -40,7 +41,7 @@ TRUST_PROXY=false
 CHATBOT_DB_CONNECTION_LIMIT=10
 ```
 
-The code currently reads `OPEN_API_KEY`, `CHATBOT_ENCRYPTION_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
+The code currently reads `OPEN_API_KEY`, `HELENA_EXPLORA_SITE_URL`, `CHATBOT_ENCRYPTION_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
 
 ## Run
 

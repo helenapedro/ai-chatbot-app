@@ -14,6 +14,10 @@ const envSchema = z.object({
       .enum(['development', 'test', 'production'])
       .default('development'),
    OPEN_API_KEY: z.string().trim().min(1, 'OPEN_API_KEY is required'),
+   HELENA_EXPLORA_SITE_URL: z.preprocess(
+      emptyStringToUndefined,
+      z.string().trim().url('HELENA_EXPLORA_SITE_URL must be a valid URL')
+   ),
    PORT: z.coerce.number().int().min(1).max(65535).default(3000),
    CLIENT_ORIGIN: z.preprocess(
       emptyStringToUndefined,
