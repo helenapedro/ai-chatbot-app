@@ -86,7 +86,13 @@ export const chatService = {
             conversationId,
             'bot',
             response.output_text,
-            response.id
+            {
+               openAiResponseId: response.id,
+               modelName: String(response.model),
+               inputTokens: response.usage?.input_tokens,
+               outputTokens: response.usage?.output_tokens,
+               totalTokens: response.usage?.total_tokens,
+            }
          );
 
          return {

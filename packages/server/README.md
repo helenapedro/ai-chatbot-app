@@ -22,6 +22,7 @@ Create a local env file in `packages/server/.env`:
 OPEN_API_KEY=your_openai_api_key
 CLIENT_ORIGIN=http://localhost:5173
 PORT=3000
+CHATBOT_ENCRYPTION_KEY=your_64_character_hex_key
 CHATBOT_DB_HOST=127.0.0.1
 CHATBOT_DB_PORT=3306
 CHATBOT_DB_NAME=your_database_name
@@ -39,7 +40,7 @@ TRUST_PROXY=false
 CHATBOT_DB_CONNECTION_LIMIT=10
 ```
 
-The code currently reads `OPEN_API_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
+The code currently reads `OPEN_API_KEY`, `CHATBOT_ENCRYPTION_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
 
 ## Run
 
@@ -62,6 +63,8 @@ The server listens on `http://localhost:3000` by default.
 On startup, the server creates the `conversation_sessions` table automatically if it does not already exist.
 
 If you want to create it manually in phpMyAdmin, run the SQL from `packages/server/sql/conversation_sessions.sql`.
+
+Stored message `content` is encrypted at the application layer with AES-256-GCM before it is written to MySQL.
 
 ## API
 
@@ -122,6 +125,10 @@ Successful response:
          "role": "user",
          "content": "Hello",
          "openAiResponseId": null,
+         "modelName": null,
+         "inputTokens": null,
+         "outputTokens": null,
+         "totalTokens": null,
          "createdAt": "2026-03-28T21:25:28.000Z"
       },
       {
@@ -129,6 +136,10 @@ Successful response:
          "role": "bot",
          "content": "Hi, how can I help?",
          "openAiResponseId": "resp_123",
+         "modelName": "gpt-4o-mini",
+         "inputTokens": 123,
+         "outputTokens": 42,
+         "totalTokens": 165,
          "createdAt": "2026-03-28T21:25:29.000Z"
       }
    ]
@@ -139,4 +150,6 @@ Successful response:
 
 - Conversation state is stored in MySQL in `conversation_sessions`
 - Full message history is stored in MySQL in `conversation_messages`
+- Message content is encrypted before storage
+- Bot messages store OpenAI model and token usage metadata
 - The OpenAI model is currently `gpt-4o-mini`

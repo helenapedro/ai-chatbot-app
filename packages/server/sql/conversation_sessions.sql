@@ -9,7 +9,13 @@ CREATE TABLE IF NOT EXISTS conversation_messages (
    conversation_id CHAR(36) NOT NULL,
    role VARCHAR(16) NOT NULL,
    content TEXT NOT NULL,
+   content_iv VARCHAR(24) NULL,
+   content_auth_tag VARCHAR(24) NULL,
    openai_response_id VARCHAR(255) NULL,
+   model_name VARCHAR(100) NULL,
+   input_tokens INT NULL,
+   output_tokens INT NULL,
+   total_tokens INT NULL,
    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
    INDEX idx_conversation_messages_conversation_id_created_at (conversation_id, created_at, id),
    CONSTRAINT chk_conversation_messages_role

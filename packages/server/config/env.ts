@@ -38,6 +38,16 @@ const envSchema = z.object({
          .default('false')
          .transform((value) => value === 'true')
    ),
+   CHATBOT_ENCRYPTION_KEY: z.preprocess(
+      emptyStringToUndefined,
+      z
+         .string()
+         .trim()
+         .regex(
+            /^[a-f0-9]{64}$/i,
+            'CHATBOT_ENCRYPTION_KEY must be a 64-character hex string'
+         )
+   ),
    CHATBOT_DB_HOST: z.preprocess(
       emptyStringToUndefined,
       z.string().trim().min(1, 'CHATBOT_DB_HOST is required')
