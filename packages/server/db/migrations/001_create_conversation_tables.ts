@@ -1,4 +1,6 @@
-import { pool } from './pool';
+import type { Pool } from 'mysql2/promise';
+
+import type { Migration } from './migration.types';
 
 const createConversationSessionsTableSql = `
    CREATE TABLE IF NOT EXISTS conversation_sessions (
@@ -28,25 +30,18 @@ const createConversationMessagesTableSql = `
    )
 `;
 
-const conversationMessagesMigrationStatements = [
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS content_iv VARCHAR(24) NULL AFTER content',
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS content_auth_tag VARCHAR(24) NULL AFTER content_iv',
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS model_name VARCHAR(100) NULL AFTER openai_response_id',
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS input_tokens INT NULL AFTER model_name',
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS output_tokens INT NULL AFTER input_tokens',
-   'ALTER TABLE conversation_messages ADD COLUMN IF NOT EXISTS total_tokens INT NULL AFTER output_tokens',
-];
-
-const runStatements = async (statements: string[]) => {
+const runStatements = async (pool: Pool, statements: string[]) => {
    for (const statement of statements) {
       await pool.query(statement);
    }
 };
 
-export const initializeSchema = async () => {
-   await runStatements([
-      createConversationSessionsTableSql,
-      createConversationMessagesTableSql,
-      ...conversationMessagesMigrationStatements,
-   ]);
+export const createConversationTablesMigration: Migration = {
+   name: '001_create_conversation_tables',
+   async up(pool) {
+      await runStatements(pool, [
+         createConversationSessionsTableSql,
+         createConversationMessagesTableSql,
+      ]);
+   },
 };

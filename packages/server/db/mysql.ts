@@ -1,19 +1,16 @@
 import { AppError } from '../errors/app-error';
-import { backfillEncryptedMessages } from './encryption-backfill';
 import { database, pool } from './pool';
-import { initializeSchema } from './schema';
 
-const createInitializationError = (error: unknown) =>
-   new AppError('Failed to initialize the database.', 500, {
+const createConnectionError = (error: unknown) =>
+   new AppError('Failed to connect to the database.', 500, {
       cause: error instanceof Error ? error.message : 'Unknown database error',
    });
 
 export const initializeDatabase = async () => {
    try {
-      await initializeSchema();
-      await backfillEncryptedMessages();
+      await pool.query('SELECT 1');
    } catch (error) {
-      throw createInitializationError(error);
+      throw createConnectionError(error);
    }
 };
 

@@ -3,6 +3,7 @@ import { randomUUID } from 'crypto';
 import type { RowDataPacket } from 'mysql2';
 
 import { database, initializeDatabase } from '../../db/mysql';
+import { runMigrations } from '../../db/migrate';
 import { conversationMessageRepository } from './conversation-message.repository';
 import { conversationSessionRepository } from './conversation-session.repository';
 
@@ -38,6 +39,7 @@ const cleanupConversation = async (conversationId: string) => {
 };
 
 beforeAll(async () => {
+   await runMigrations();
    await initializeDatabase();
 });
 

@@ -43,6 +43,12 @@ CHATBOT_DB_CONNECTION_LIMIT=10
 
 The code currently reads `OPEN_API_KEY`, `HELENA_EXPLORA_SITE_URL`, `CHATBOT_ENCRYPTION_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
 
+Run database migrations before starting the server:
+
+```bash
+bun run migrate
+```
+
 ## Run
 
 Start in watch mode:
@@ -61,7 +67,8 @@ The server listens on `http://localhost:3000` by default.
 
 ## Database
 
-On startup, the server creates the `conversation_sessions` table automatically if it does not already exist.
+Database schema changes are handled through explicit migrations.
+The server startup now validates database connectivity, but it does not create or alter schema automatically.
 
 If you want to create it manually in phpMyAdmin, run the SQL from `packages/server/sql/conversation_sessions.sql`.
 
