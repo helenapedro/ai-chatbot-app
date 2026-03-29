@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import * as Sentry from '@sentry/react';
 import axios from 'axios';
 import { AlertCircle } from 'lucide-react';
@@ -8,7 +8,14 @@ import notificationSound from '../assets/sounds/notification.mp3';
 import popSound from '../assets/sounds/pop.mp3';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
-import type { ChatFormData, ChatResponse, Message } from './chat.types';
+import type {
+   ChatFormData,
+   ChatResponse,
+   Message,
+   MessageHistoryResponse,
+} from './chat.types';
+
+const CONVERSATION_ID_STORAGE_KEY = 'helena-explora-conversation-id';
 
 const getRequestErrorMessage = (error: unknown) => {
    if (!axios.isAxiosError(error)) {
@@ -31,7 +38,28 @@ const getRequestErrorMessage = (error: unknown) => {
 };
 
 const ChatBot = () => {
-   const [conversationId] = useState(() => crypto.randomUUID());
+   const [conversationId] = useState(() => {
+      if (typeof window === 'undefined') {
+         return crypto.randomUUID();
+      }
+
+      const existingConversationId = window.localStorage.getItem(
+         CONVERSATION_ID_STORAGE_KEY
+      );
+
+      if (existingConversationId) {
+         return existingConversationId;
+      }
+
+      const newConversationId = crypto.randomUUID();
+      window.localStorage.setItem(
+         CONVERSATION_ID_STORAGE_KEY,
+         newConversationId
+      );
+
+      return newConversationId;
+   });
+   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
    const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
    const [messages, setMessages] = useState<Message[]>([]);
    const [errorMessage, setErrorMessage] = useState('');
@@ -50,6 +78,38 @@ const ChatBot = () => {
          // Ignore playback failures caused by browser autoplay restrictions.
       });
    };
+
+   useEffect(() => {
+      const loadConversationHistory = async () => {
+         try {
+            const { data } = await axios.get<MessageHistoryResponse>(
+               `/api/conversations/${conversationId}/messages`
+            );
+
+            setMessages(
+               data.messages.map((message) => ({
+                  content: message.content,
+                  role: message.role,
+               }))
+            );
+         } catch (error) {
+            Sentry.captureException(error, {
+               tags: {
+                  feature: 'chat',
+                  operation: 'load_message_history',
+               },
+               extra: {
+                  conversationId,
+               },
+            });
+            setErrorMessage('Failed to load the previous conversation.');
+         } finally {
+            setIsLoadingHistory(false);
+         }
+      };
+
+      void loadConversationHistory();
+   }, [conversationId]);
 
    const {
       register,
@@ -107,11 +167,11 @@ const ChatBot = () => {
       <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
          <ChatMessages
             messages={messages}
-            isSubmittingMessage={isSubmittingMessage}
+            isSubmittingMessage={isSubmittingMessage || isLoadingHistory}
          />
          <ChatInput
             handleSubmit={handleSubmit}
-            isSubmittingMessage={isSubmittingMessage}
+            isSubmittingMessage={isSubmittingMessage || isLoadingHistory}
             isValid={isValid}
             onSubmit={onSubmit}
             register={register}

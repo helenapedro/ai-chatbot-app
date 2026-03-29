@@ -21,7 +21,7 @@ Create a local env file in `packages/server/.env`:
 ```env
 OPEN_API_KEY=your_openai_api_key
 HELENA_EXPLORA_SITE_URL=https://helenaexplora.hmpedro.com/
-CLIENT_ORIGIN=http://localhost:5173
+CLIENT_ORIGIN=http://localhost:8080/,https://helenaexplora.hmpedro.com/
 PORT=3000
 CHATBOT_ENCRYPTION_KEY=your_64_character_hex_key
 CHATBOT_DB_HOST=127.0.0.1
