@@ -32,6 +32,7 @@ PORT=3000
 JSON_BODY_LIMIT=16kb
 RATE_LIMIT_WINDOW_MS=60000
 RATE_LIMIT_MAX_REQUESTS=30
+RETENTION_DAYS=90
 TRUST_PROXY=false
 CHATBOT_ENCRYPTION_KEY=your_64_character_hex_key
 CHATBOT_DB_HOST=127.0.0.1
@@ -89,6 +90,14 @@ npm run build
 npm run migrate
 npm start
 ```
+
+Retention cleanup is an explicit operational command:
+
+```bash
+npm run cleanup:retention
+```
+
+In production, run that command on a schedule, for example once per day with Heroku Scheduler.
 
 Heroku-style process types are already defined in `Procfile`:
 
@@ -186,6 +195,14 @@ Successful response:
 }
 ```
 
+### `DELETE /api/conversations/:conversationId`
+
+Deletes the conversation session row and all stored messages for the given `conversationId`.
+
+Successful response:
+
+- `204 No Content`
+
 ## Notes
 
 - Conversation state is stored in MySQL in `conversation_sessions`
@@ -193,3 +210,4 @@ Successful response:
 - Message content is encrypted before storage
 - Bot messages store OpenAI model and token usage metadata
 - The OpenAI model is currently `gpt-4o-mini`
+- Retention cleanup deletes expired conversation sessions and old orphaned messages based on `RETENTION_DAYS`

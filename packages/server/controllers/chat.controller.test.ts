@@ -8,6 +8,7 @@ import { chatController } from './chat.controller';
 const createResponse = () => {
    const res = {
       json: mock(() => res),
+      send: mock(() => res),
       status: mock(() => res),
    } as unknown as Response;
 
@@ -71,5 +72,35 @@ describe('chatController.sendMessage', () => {
       expect(sendMessageMock).toHaveBeenCalledTimes(1);
 
       chatService.sendMessage = originalSendMessage;
+   });
+});
+
+describe('chatController.deleteConversation', () => {
+   it('returns 204 for a valid conversation id', async () => {
+      const req = {
+         params: {
+            conversationId: '550e8400-e29b-41d4-a716-446655440000',
+         },
+      } as unknown as Request;
+      const res = createResponse();
+      const next = mock(() => undefined);
+      const originalDeleteConversation = chatService.deleteConversation;
+      const deleteConversationMock = mock(async () => true);
+      chatService.deleteConversation = deleteConversationMock;
+
+      await chatController.deleteConversation(
+         req,
+         res,
+         next as unknown as NextFunction
+      );
+
+      expect(deleteConversationMock).toHaveBeenCalledWith(
+         '550e8400-e29b-41d4-a716-446655440000'
+      );
+      expect(res.status).toHaveBeenCalledWith(204);
+      expect(res.send).toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
+
+      chatService.deleteConversation = originalDeleteConversation;
    });
 });

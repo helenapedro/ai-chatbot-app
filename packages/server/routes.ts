@@ -33,6 +33,10 @@ router.get(
    '/api/conversations/:conversationId/messages',
    chatController.getMessageHistory
 );
+router.delete(
+   '/api/conversations/:conversationId',
+   chatController.deleteConversation
+);
 
 router.post('/api/chat', chatController.sendMessage);
 

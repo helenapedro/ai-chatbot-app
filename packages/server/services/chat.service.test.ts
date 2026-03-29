@@ -86,3 +86,51 @@ describe('chatService.sendMessage', () => {
       openAiChatService.createResponse = originalCreateResponse;
    });
 });
+
+describe('chatService.deleteConversation', () => {
+   it('delegates conversation deletion to the repository', async () => {
+      const originalDeleteConversation =
+         conversationRepository.deleteConversation;
+      const deleteConversationMock = mock(async () => true);
+      conversationRepository.deleteConversation = deleteConversationMock;
+
+      const result = await chatService.deleteConversation(
+         '550e8400-e29b-41d4-a716-446655440000'
+      );
+
+      expect(deleteConversationMock).toHaveBeenCalledWith(
+         '550e8400-e29b-41d4-a716-446655440000'
+      );
+      expect(result).toBe(true);
+
+      conversationRepository.deleteConversation = originalDeleteConversation;
+   });
+});
+
+describe('chatService.cleanupExpiredConversations', () => {
+   it('delegates retention cleanup to the repository', async () => {
+      const originalCleanupExpiredConversations =
+         conversationRepository.cleanupExpiredConversations;
+      const cleanupExpiredConversationsMock = mock(async () => ({
+         cutoffDate: '2026-01-01T00:00:00.000Z',
+         deletedExpiredMessageCount: 2,
+         deletedOrphanedMessageCount: 1,
+         deletedSessionCount: 1,
+      }));
+      conversationRepository.cleanupExpiredConversations =
+         cleanupExpiredConversationsMock;
+
+      const result = await chatService.cleanupExpiredConversations(90);
+
+      expect(cleanupExpiredConversationsMock).toHaveBeenCalledWith(90);
+      expect(result).toEqual({
+         cutoffDate: '2026-01-01T00:00:00.000Z',
+         deletedExpiredMessageCount: 2,
+         deletedOrphanedMessageCount: 1,
+         deletedSessionCount: 1,
+      });
+
+      conversationRepository.cleanupExpiredConversations =
+         originalCleanupExpiredConversations;
+   });
+});

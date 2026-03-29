@@ -7,6 +7,7 @@
    "scripts": {
       "build": "tsc -p tsconfig.build.json",
       "migrate": "node dist/db/migrate.js",
+      "cleanup:retention": "node dist/db/cleanup-retention.js",
       "start": "node dist/index.js",
       "dev": "tsx watch index.ts",
       "test": "bun test",

@@ -132,6 +132,24 @@ describe('chat controller integration', () => {
       chatService.getMessageHistory = originalGetMessageHistory;
    });
 
+   it('deletes a conversation through the Express route', async () => {
+      const originalDeleteConversation = chatService.deleteConversation;
+      const deleteConversationMock = mock(async () => true);
+      chatService.deleteConversation = deleteConversationMock;
+
+      const response = await fetch(
+         `${baseUrl}/api/conversations/${TEST_CONVERSATION_ID}`,
+         {
+            method: 'DELETE',
+         }
+      );
+
+      expect(response.status).toBe(204);
+      expect(deleteConversationMock).toHaveBeenCalledWith(TEST_CONVERSATION_ID);
+
+      chatService.deleteConversation = originalDeleteConversation;
+   });
+
    it('rejects disallowed origins before controller execution', async () => {
       const response = await fetch(`${baseUrl}/api/chat`, {
          method: 'POST',

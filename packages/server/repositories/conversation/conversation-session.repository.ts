@@ -1,4 +1,5 @@
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { PoolConnection } from 'mysql2/promise';
 
 import { database } from '../../db/mysql.js';
 
@@ -32,5 +33,32 @@ export const conversationSessionRepository = {
          `,
          [conversationId, responseId]
       );
+   },
+
+   async deleteByConversationId(
+      connection: PoolConnection,
+      conversationId: string
+   ) {
+      const [result] = await connection.query<ResultSetHeader>(
+         `
+            DELETE FROM conversation_sessions
+            WHERE conversation_id = ?
+         `,
+         [conversationId]
+      );
+
+      return result.affectedRows;
+   },
+
+   async deleteExpiredSessions(connection: PoolConnection, cutoffDate: Date) {
+      const [result] = await connection.query<ResultSetHeader>(
+         `
+            DELETE FROM conversation_sessions
+            WHERE updated_at < ?
+         `,
+         [cutoffDate]
+      );
+
+      return result.affectedRows;
    },
 };

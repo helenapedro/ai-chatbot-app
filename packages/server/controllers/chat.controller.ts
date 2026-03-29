@@ -66,4 +66,26 @@ export const chatController = {
          next(error);
       }
    },
+
+   async deleteConversation(req: Request, res: Response, next: NextFunction) {
+      const parseResult = conversationParamsSchema.safeParse(req.params);
+
+      if (!parseResult.success) {
+         next(
+            new AppError(
+               'Invalid conversation id.',
+               400,
+               parseResult.error.flatten()
+            )
+         );
+         return;
+      }
+
+      try {
+         await chatService.deleteConversation(parseResult.data.conversationId);
+         res.status(204).send();
+      } catch (error) {
+         next(error);
+      }
+   },
 };

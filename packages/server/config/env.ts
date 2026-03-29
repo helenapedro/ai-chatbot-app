@@ -35,6 +35,10 @@ const envSchema = z.object({
       emptyStringToUndefined,
       z.coerce.number().int().positive().default(30)
    ),
+   RETENTION_DAYS: z.preprocess(
+      emptyStringToUndefined,
+      z.coerce.number().int().positive().default(90)
+   ),
    TRUST_PROXY: z.preprocess(
       emptyStringToUndefined,
       z

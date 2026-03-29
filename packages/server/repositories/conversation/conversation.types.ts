@@ -17,3 +17,10 @@ export type AddMessageMetadata = {
    outputTokens?: number;
    totalTokens?: number;
 };
+
+export type ConversationRetentionCleanupResult = {
+   cutoffDate: string;
+   deletedExpiredMessageCount: number;
+   deletedOrphanedMessageCount: number;
+   deletedSessionCount: number;
+};

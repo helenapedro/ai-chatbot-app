@@ -1,5 +1,6 @@
 import {
    conversationRepository,
+   type ConversationRetentionCleanupResult,
    type StoredMessage,
 } from '../repositories/conversation.repository.js';
 import { openAiChatService } from './openai-chat.service.js';
@@ -49,5 +50,15 @@ export const chatService = {
 
    async getMessageHistory(conversationId: string): Promise<StoredMessage[]> {
       return conversationRepository.getMessages(conversationId);
+   },
+
+   async deleteConversation(conversationId: string) {
+      return conversationRepository.deleteConversation(conversationId);
+   },
+
+   async cleanupExpiredConversations(
+      retentionDays: number
+   ): Promise<ConversationRetentionCleanupResult> {
+      return conversationRepository.cleanupExpiredConversations(retentionDays);
    },
 };

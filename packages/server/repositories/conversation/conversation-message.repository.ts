@@ -1,11 +1,15 @@
-import type { RowDataPacket } from 'mysql2';
+import type { ResultSetHeader, RowDataPacket } from 'mysql2';
+import type { PoolConnection } from 'mysql2/promise';
 
 import { database } from '../../db/mysql.js';
 import {
    decryptMessageContent,
    encryptMessageContent,
 } from '../../security/message-crypto.js';
-import type { AddMessageMetadata, StoredMessage } from './conversation.types.js';
+import type {
+   AddMessageMetadata,
+   StoredMessage,
+} from './conversation.types.js';
 
 type ConversationMessageRow = RowDataPacket & {
    content: string;
@@ -98,5 +102,57 @@ export const conversationMessageRepository = {
          totalTokens: row.total_tokens,
          createdAt: row.created_at,
       }));
+   },
+
+   async deleteByConversationId(
+      connection: PoolConnection,
+      conversationId: string
+   ) {
+      const [result] = await connection.query<ResultSetHeader>(
+         `
+            DELETE FROM conversation_messages
+            WHERE conversation_id = ?
+         `,
+         [conversationId]
+      );
+
+      return result.affectedRows;
+   },
+
+   async deleteExpiredConversationMessages(
+      connection: PoolConnection,
+      cutoffDate: Date
+   ) {
+      const [result] = await connection.query<ResultSetHeader>(
+         `
+            DELETE conversation_messages
+            FROM conversation_messages
+            INNER JOIN conversation_sessions
+               ON conversation_sessions.conversation_id = conversation_messages.conversation_id
+            WHERE conversation_sessions.updated_at < ?
+         `,
+         [cutoffDate]
+      );
+
+      return result.affectedRows;
+   },
+
+   async deleteExpiredOrphanedMessages(
+      connection: PoolConnection,
+      cutoffDate: Date
+   ) {
+      const [result] = await connection.query<ResultSetHeader>(
+         `
+            DELETE conversation_messages
+            FROM conversation_messages
+            LEFT JOIN conversation_sessions
+               ON conversation_sessions.conversation_id = conversation_messages.conversation_id
+            WHERE conversation_sessions.conversation_id IS NULL
+               AND conversation_messages.created_at < ?
+         `,
+         [cutoffDate]
+      );
+
+      return result.affectedRows;
    },
 };
