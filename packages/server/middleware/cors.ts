@@ -4,9 +4,11 @@ type CorsOptions = {
    allowedOrigins: string[];
 };
 
+const normalizeOrigin = (origin: string) => origin.trim().replace(/\/+$/, '');
+
 export const createCorsMiddleware = ({ allowedOrigins }: CorsOptions) => {
    const normalizedOrigins = allowedOrigins
-      .map((origin) => origin.trim())
+      .map(normalizeOrigin)
       .filter(Boolean);
 
    return (req: Request, res: Response, next: NextFunction) => {
@@ -17,7 +19,9 @@ export const createCorsMiddleware = ({ allowedOrigins }: CorsOptions) => {
          return;
       }
 
-      if (!normalizedOrigins.includes(origin)) {
+      const normalizedRequestOrigin = normalizeOrigin(origin);
+
+      if (!normalizedOrigins.includes(normalizedRequestOrigin)) {
          res.status(403).json({ error: 'Origin not allowed.' });
          return;
       }
