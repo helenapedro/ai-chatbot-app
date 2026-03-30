@@ -2,7 +2,7 @@
 
 Backend API for the Helena Explora chatbot. This service accepts chat requests, coordinates OpenAI Responses API calls, persists conversation state in MySQL, stores encrypted message history, and exposes the endpoints needed for a frontend to restore and manage chat sessions.
 
-This server was built to demonstrate Software Development I/II-level backend skills:
+Skills:
 
 - designing and documenting a small but production-oriented REST API
 - structuring code by responsibility across controllers, services, repositories, middleware, and database utilities
