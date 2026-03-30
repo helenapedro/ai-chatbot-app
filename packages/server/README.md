@@ -1,28 +1,122 @@
 # Server
 
-Express API for the chat app. The server exposes a small REST surface and uses the OpenAI Responses API to continue a conversation based on the last response ID stored for each `conversationId`.
+Backend API for the Helena Explora chatbot. This service accepts chat requests, coordinates OpenAI Responses API calls, persists conversation state in MySQL, stores encrypted message history, and exposes the endpoints needed for a frontend to restore and manage chat sessions.
+
+This server was built to demonstrate Software Development I/II-level backend skills:
+
+- designing and documenting a small but production-oriented REST API
+- structuring code by responsibility across controllers, services, repositories, middleware, and database utilities
+- validating input and centralizing error handling
+- integrating with an external AI service behind a service boundary
+- persisting application state in a relational database instead of memory
+- handling operational concerns such as health checks, migrations, logging, CORS, rate limiting, and data retention
+
+## What This Service Does
+
+The API is focused on one product use case: answering questions about studying in the United States through the Helena Explora chatbot.
+
+At runtime, the server:
+
+1. receives a user prompt and a `conversationId`
+2. loads the project-specific system prompt
+3. looks up the previous OpenAI response for that conversation
+4. sends the next request to the OpenAI Responses API
+5. stores the assistant response and conversation metadata
+6. returns the response to the client
+
+The backend also supports restoring chat history and deleting stored conversations.
+
+## Architecture
+
+The server follows a layered structure:
+
+- `controllers/`
+  Request validation and HTTP response handling
+- `services/`
+  Application orchestration and external API coordination
+- `repositories/`
+  Database persistence for sessions and messages
+- `middleware/`
+  CORS, rate limiting, request logging, and centralized error handling
+- `db/`
+  Connection pool, migrations, and retention cleanup runner
+- `security/`
+  Message encryption helpers
+- `prompts/`
+  Prompt templates and project-specific AI instructions
+
+This split keeps each layer focused:
+
+- controllers know HTTP
+- services know workflow
+- repositories know SQL and persistence
+- middleware handles cross-cutting concerns
+
+## Key Engineering Decisions
+
+### Persistent conversation state
+
+The first version used in-memory storage. That was replaced with MySQL so conversations survive server restarts and can be restored by the client.
+
+### Encrypted message storage
+
+Stored chat content is encrypted at the application layer with AES-256-GCM before being written to MySQL. The server decrypts content only when it needs to return message history to the client.
+
+### Explicit migrations
+
+Schema changes are handled through versioned migrations instead of startup-time schema mutation. This makes deployment more predictable and is closer to how production systems are operated.
+
+### Structured logging
+
+The service logs request metadata, handled errors, and operational events in structured JSON format. The goal is to make troubleshooting easier without logging plaintext chat content.
+
+### Prompt isolation
+
+Prompt loading is isolated behind a service and backed by template files in `prompts/`. This keeps AI behavior configurable without mixing prompt text into route or controller logic.
+
+## Technology
+
+- Node.js 24
+- Express 5
+- MySQL
+- OpenAI Responses API
+- TypeScript
+- Zod
+- Bun test runner for local tests
 
 ## Requirements
 
 - Node.js 24
-- An OpenAI API key
 - A MySQL-compatible database
+- An OpenAI API key
 
-## Setup
+## Environment Variables
 
-If you are working inside this monorepo, install dependencies from the repo root:
+Create a local `.env` file from `.env.example`.
 
-```bash
-npm install
-```
+Required:
 
-If you want to deploy the server as a standalone Node app, use `packages/server` as the app root and install dependencies there:
+- `OPEN_API_KEY`
+- `HELENA_EXPLORA_SITE_URL`
+- `CHATBOT_ENCRYPTION_KEY`
+- `CHATBOT_DB_HOST`
+- `CHATBOT_DB_PORT`
+- `CHATBOT_DB_NAME`
+- `CHATBOT_DB_USER`
+- `CHATBOT_DB_PASSWORD`
 
-```bash
-npm install
-```
+Optional:
 
-Create a local env file from `.env.example`:
+- `CLIENT_ORIGIN`
+- `PORT`
+- `JSON_BODY_LIMIT`
+- `RATE_LIMIT_WINDOW_MS`
+- `RATE_LIMIT_MAX_REQUESTS`
+- `RETENTION_DAYS`
+- `TRUST_PROXY`
+- `CHATBOT_DB_CONNECTION_LIMIT`
+
+Example:
 
 ```env
 OPEN_API_KEY=your_openai_api_key
@@ -43,46 +137,42 @@ CHATBOT_DB_PASSWORD=your_database_password
 CHATBOT_DB_CONNECTION_LIMIT=10
 ```
 
-The code currently reads `OPEN_API_KEY`, `HELENA_EXPLORA_SITE_URL`, `CHATBOT_ENCRYPTION_KEY`, `CHATBOT_DB_HOST`, `CHATBOT_DB_PORT`, `CHATBOT_DB_NAME`, `CHATBOT_DB_USER`, and `CHATBOT_DB_PASSWORD`, so use those exact variable names.
+## Local Development
 
-Run database migrations before starting the server:
+If you are using the monorepo setup, dependencies are typically installed from the repo root.
+
+Build the server:
 
 ```bash
 npm run build
+```
+
+Run database migrations:
+
+```bash
 npm run migrate
 ```
 
-## Run
-
-Start in watch mode:
-
-```bash
-npm run dev
-```
-
-Start normally:
+Start the server:
 
 ```bash
 npm start
 ```
 
-The server listens on `http://localhost:3000` by default.
+The API listens on `http://localhost:3000` by default.
 
 ## Standalone Deployment
 
-To deploy this package on its own, your deploy root should contain the contents of `packages/server`, not the whole monorepo root.
+This package can be deployed independently from the rest of the monorepo. The deployment root should be the contents of `packages/server`, not the repository root.
 
-Required files and directories at deploy time:
+Expected runtime files:
 
 - `package.json`
 - `Procfile`
 - `dist/`
 - `prompts/`
-- `.env` or equivalent platform-managed env vars
 
-The prompt loader reads `prompts/chatbot.txt` and `prompts/helenaexplora.md` from the package root at runtime, so keep the `prompts/` directory alongside `dist/`.
-
-Typical standalone flow:
+Typical deployment flow:
 
 ```bash
 npm install
@@ -91,49 +181,32 @@ npm run migrate
 npm start
 ```
 
-Retention cleanup is an explicit operational command:
-
-```bash
-npm run cleanup:retention
-```
-
-In production, run that command on a schedule, for example once per day with Heroku Scheduler.
-
-Heroku-style process types are already defined in `Procfile`:
+Heroku-style process types are already defined:
 
 ```Procfile
 release: npm run migrate
 web: npm start
 ```
 
-## Database
-
-Database schema changes are handled through explicit migrations.
-The server startup now validates database connectivity, but it does not create or alter schema automatically.
-
-If you want to create it manually in phpMyAdmin, run the SQL from `packages/server/sql/conversation_sessions.sql`.
-
-Stored message `content` is encrypted at the application layer with AES-256-GCM before it is written to MySQL.
-
 ## API
 
 ### `GET /`
 
-Returns a plain text health-style response.
+Simple health-style response.
 
-### `GET /api/hello`
+### `GET /healthz`
 
-Returns:
+Basic liveness check.
 
-```json
-{ "message": "Hi Helena!" }
-```
+### `GET /readyz`
+
+Readiness check that verifies database connectivity.
 
 ### `POST /api/chat`
 
-Sends a user prompt to OpenAI and continues the conversation using the last response ID associated with the provided `conversationId`.
+Continues a conversation using the provided `conversationId`.
 
-Request body:
+Request:
 
 ```json
 {
@@ -147,7 +220,7 @@ Validation rules:
 - `prompt` is required, trimmed, and must be between 1 and 1000 characters
 - `conversationId` is required and must be a valid UUID
 
-Successful response:
+Success response:
 
 ```json
 {
@@ -155,16 +228,11 @@ Successful response:
 }
 ```
 
-Error responses:
-
-- `400` for invalid request payloads
-- `500` if the server cannot generate a response
-
 ### `GET /api/conversations/:conversationId/messages`
 
-Returns the stored message history for a conversation.
+Returns stored message history for the conversation.
 
-Successful response:
+Example response:
 
 ```json
 {
@@ -179,17 +247,6 @@ Successful response:
          "outputTokens": null,
          "totalTokens": null,
          "createdAt": "2026-03-28T21:25:28.000Z"
-      },
-      {
-         "id": 2,
-         "role": "bot",
-         "content": "Hi, how can I help?",
-         "openAiResponseId": "resp_123",
-         "modelName": "gpt-4o-mini",
-         "inputTokens": 123,
-         "outputTokens": 42,
-         "totalTokens": 165,
-         "createdAt": "2026-03-28T21:25:29.000Z"
       }
    ]
 }
@@ -197,17 +254,101 @@ Successful response:
 
 ### `DELETE /api/conversations/:conversationId`
 
-Deletes the conversation session row and all stored messages for the given `conversationId`.
+Deletes the session row and all stored messages for the given conversation.
 
-Successful response:
+Success response:
 
 - `204 No Content`
 
-## Notes
+## Data Model
 
-- Conversation state is stored in MySQL in `conversation_sessions`
-- Full message history is stored in MySQL in `conversation_messages`
-- Message content is encrypted before storage
-- Bot messages store OpenAI model and token usage metadata
-- The OpenAI model is currently `gpt-4o-mini`
-- Retention cleanup deletes expired conversation sessions and old orphaned messages based on `RETENTION_DAYS`
+### `conversation_sessions`
+
+Stores one row per conversation:
+
+- `conversation_id`
+- `last_response_id`
+- `updated_at`
+
+### `conversation_messages`
+
+Stores the encrypted message history:
+
+- `id`
+- `conversation_id`
+- `role`
+- encrypted `content`
+- encryption metadata (`content_iv`, `content_auth_tag`)
+- OpenAI response metadata
+- token usage metadata
+- `created_at`
+
+## Operations
+
+### Migrations
+
+Database schema changes are versioned under `db/migrations/`.
+
+Run them with:
+
+```bash
+npm run migrate
+```
+
+### Retention cleanup
+
+Expired data cleanup is handled by:
+
+```bash
+npm run cleanup:retention
+```
+
+This command deletes:
+
+- conversations whose session `updated_at` is older than `RETENTION_DAYS`
+- orphaned old messages left behind when a session row was never created
+
+For small traffic, this can be run manually. For higher traffic, it should be scheduled.
+
+## Testing
+
+The server includes unit and integration tests for:
+
+- controller validation
+- service orchestration
+- repository persistence
+- encrypted message storage
+- Express route behavior
+
+Examples:
+
+```bash
+bun test
+bun run test:integration
+```
+
+## Production Readiness Features
+
+This backend includes several production-oriented concerns beyond basic request handling:
+
+- environment validation at startup
+- centralized error handling
+- structured request and error logging
+- CORS allowlist support
+- rate limiting
+- persistent MySQL-backed conversation state
+- encrypted message storage
+- readiness and health endpoints
+- explicit schema migrations
+- retention cleanup tooling
+
+## What This Project Demonstrates
+
+From a Software Development I/II perspective, this server shows the ability to:
+
+- build a real API around a practical product requirement
+- refactor from a demo architecture to a more production-oriented one
+- separate concerns cleanly across modules
+- reason about persistence, encryption, and external service boundaries
+- improve maintainability with migrations, tests, and documentation
+- think about deployment and operations, not only feature code
